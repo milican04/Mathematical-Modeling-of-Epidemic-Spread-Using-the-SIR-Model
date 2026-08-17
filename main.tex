@@ -64,19 +64,57 @@ The flow of individuals between the compartments is governed by two primary rate
 \subsection{System of Differential Equations}
 The dynamic transitions between the Susceptible ($S$), Infectious ($I$), and Recovered ($R$) states are mathematically described by the following system of non-linear ordinary differential equations:
 
+
 \begin{align}
-    \frac{dS}{dt} &= -\frac{\beta S I}{N} \\
-    \frac{dI}{dt} &= \frac{\beta S I}{N} - \gamma I \\
-    \frac{dR}{dt} &= \gamma I
+    \frac{dS}{dt} &= -\frac{\beta S I}{N} \label{eq:sir_S} \\
+    \frac{dI}{dt} &= \frac{\beta S I}{N} - \gamma I \label{eq:sir_I} \\
+    \frac{dR}{dt} &= \gamma I \label{eq:sir_R}
 \end{align}
 
+Let us now explain the equations presented above.
+
+The first equation \eqref{eq:sir_S} represents the rate of change for the susceptible population ($S$). Intuitively, this number decreases over time as individuals contract the disease and leave this group, which accounts for the negative sign. The multiplication of $S$ and $I$ stems from the assumption that the population mixes randomly. It reflects the fact that the likelihood of a disease transmission event depends directly on a susceptible individual coming into contact with an infected one. We divide by the total population size, $N$, because the term $\frac{I}{N}$ represents the fraction of the population that is currently infected. This fraction gives the realistic probability that a susceptible person will encounter someone who is sick. By dividing by $N$, we make sure the model assumes people have a normal amount of daily contacts, rather than incorrectly assuming they meet way more people just because they live in a larger population. Finally, the transmission parameter, $\beta$, dictates the overall rate at which these infectious contacts occur.
+
+
+As the number of susceptible individuals decreases, they must transition into the infected group ($I$). This inflow of newly infected individuals explains the first term on the right-hand side of the second equation \eqref{eq:sir_I}. At the same time, infected individuals are recovering at a specific rate, $\gamma$. This continuous outflow from the infected group accounts for the subtracted second term.
+
+The third equation \eqref{eq:sir_R} describes the change in the removed or recovered population ($R$). It is intuitive that this number---which, as a reminder, encompasses both successful recoveries and disease-induced fatalities---will grow over time. The rate at which this group increases is exactly equal to the rate at which individuals exit the infected group.
+
 \section{Numerical Methods}
-Because this system of non-linear ODEs does not have a simple analytical solution, numerical integration methods must be employed to compute the states over discrete time steps.
+It is important to note that the system of ordinary differential equations governing the SIR model is nonlinear due to the interaction between the susceptible and infected populations. Because of this nonlinearity, these ODEs do not have a simple analytical solution. Therefore, to analyze the dynamics of the epidemic, it is necessary to employ numerical methods to approximate the solutions to these equations.
 
 \subsection{Euler Method}
-TODO
+The Euler method is a fundamental first-order numerical procedure used for approximating the solutions of ordinary differential equations (ODEs) with a given initial value. It calculates the solution curve step-by-step by using the derivative (slope) of the function at a known point to estimate the function's value at a subsequent point. 
+
+Given an initial value problem of the form $\frac{dy}{dt} = f(t, y)$ with the initial condition $y(t_0) = y_0$, the Euler method discretizes the time domain into steps of size $\Delta t$. The value of the state variable at the next time step, $y_{n+1}$, is computed using the following explicit formula:
+
+\begin{equation}
+    y_{n+1} = y_n + \Delta t \cdot f(t_n, y_n) \label{eq:euler_general}
+\end{equation}
+
+While the Euler method is computationally straightforward and easy to implement, it is a first-order method. Consequently, its accuracy and numerical stability are highly dependent on selecting a sufficiently small time step, $\Delta t$, to minimize the local truncation error at each iteration.
+
 \subsection{Runge-Kutta Method (RK4)}
-TODO
+
+The classic fourth-order Runge-Kutta method (often abbreviated as RK4) is a highly accurate and widely used numerical technique for solving ordinary differential equations. While the first-order Euler method relies solely on the derivative at the beginning of a time step, RK4 achieves greater precision by calculating four distinct slopes within each interval and computing their weighted average.
+
+For a given initial value problem $\frac{dy}{dt} = f(t, y)$, the method determines the next value, $y_{n+1}$, using the following sequence of calculations:
+
+\begin{align}
+    k_1 &= f(t_n, y_n) \label{eq:rk4_k1} \\
+    k_2 &= f\left(t_n + \frac{\Delta t}{2}, y_n + \frac{\Delta t}{2} k_1\right) \label{eq:rk4_k2} \\
+    k_3 &= f\left(t_n + \frac{\Delta t}{2}, y_n + \frac{\Delta t}{2} k_2\right) \label{eq:rk4_k3} \\
+    k_4 &= f(t_n + \Delta t, y_n + \Delta t k_3) \label{eq:rk4_k4}
+\end{align}
+
+Once these four slopes are evaluated, the state at the next time step is computed as:
+
+\begin{equation}
+    y_{n+1} = y_n + \frac{\Delta t}{6} (k_1 + 2k_2 + 2k_3 + k_4) \label{eq:rk4_final}
+\end{equation}
+
+In this weighted average, the midpoint slopes ($k_2$ and $k_3$) are given twice the weight of the endpoints ($k_1$ and $k_4$). Because RK4 is a fourth-order method, the global truncation error is on the order of $O(\Delta t^4)$. This makes it vastly more accurate and stable than the Euler method, allowing for larger time steps without sacrificing precision.
+
 \section{Results and Analysis}
 
 \subsection{Baseline Simulation}
