@@ -94,6 +94,33 @@ Given an initial value problem of the form $\frac{dy}{dt} = f(t, y)$ with the in
 
 While the Euler method is computationally straightforward and easy to implement, it is a first-order method. Consequently, its accuracy and numerical stability are highly dependent on selecting a sufficiently small time step, $\Delta t$, to minimize the local truncation error at each iteration.
 
+% --- Parameter Sensitivity Figure and Explanation ---
+
+\begin{figure}[htbp]
+    \centering
+    % Make sure the filename matches what you saved the image as
+    \includegraphics[width=\textwidth]{Figures/euler_params_sensitivity.png}
+    \caption{Parameter sensitivity analysis demonstrating the effect of varying transmission ($\beta$) and recovery ($\gamma$) rates on the infected population. Adjusting these parameters illustrates the mathematical concept of flattening the epidemic curve.}
+    \label{fig:sensitivity}
+\end{figure}
+
+The sensitivity analysis presented in Figure \ref{fig:sensitivity} illustrates how the fundamental shape of an epidemic is governed by the basic reproduction number ($R_0 = \frac{\beta}{\gamma}$). By systematically adjusting one parameter while holding the other constant, we can isolate their specific effects on the system's dynamics. It is important to note that this behavior is an inherent mathematical property of the SIR model's differential equations, completely independent of the numerical method used to approximate the solution. As shown in the left panel, increasing the transmission rate ($\beta$) accelerates the exponential growth phase, resulting in a higher, earlier peak of active infections. Conversely, the right panel demonstrates that increasing the recovery rate ($\gamma$) reduces the infectious window, thereby significantly lowering the peak and mitigating the overall severity of the outbreak.
+
+\vspace{1em}
+
+% --- Data-Driven Model Figure and Explanation ---
+
+\begin{figure}[htbp]
+    \centering
+    % Make sure the filename matches what you saved the image as
+    \includegraphics[width=0.85\textwidth]{Figures/euler_data_driven_params.png} 
+    \caption{Forward Euler approximation of the SIR model compared against observed data from the 1978 British boarding school influenza outbreak. Model parameters were computationally estimated using only the first 7 days of training data and time stamp dt = 0.1.}
+    \label{fig:data_driven}
+\end{figure}
+
+Figure \ref{fig:data_driven} demonstrates the model's forecasting capability when grounded in real-world historical data. To achieve this, we developed a Python data pipeline utilizing the \texttt{scipy.optimize.curve\_fit} function to computationally minimize the error between our forward Euler approximation and the actual historical record. By utilizing this optimization algorithm to fit the $\beta$ and $\gamma$ parameters strictly to the first week of observed infections (represented by the black dots), the simulation successfully maps the reality of the virus. This deliberate train-test split ensures that the algorithm is not merely curve-fitting the past, but actively forecasting the future. The close alignment between the predicted infected curve (solid red line) and the observed data during the second, "unseen" week mathematically confirms that the model can accurately predict the trajectory and definitive end of an epidemic.
+
+
 \subsection{Runge-Kutta Method (RK4)}
 
 The classic fourth-order Runge-Kutta method (often abbreviated as RK4) is a highly accurate and widely used numerical technique for solving ordinary differential equations. While the first-order Euler method relies solely on the derivative at the beginning of a time step, RK4 achieves greater precision by calculating four distinct slopes within each interval and computing their weighted average.
@@ -115,19 +142,53 @@ Once these four slopes are evaluated, the state at the next time step is compute
 
 In this weighted average, the midpoint slopes ($k_2$ and $k_3$) are given twice the weight of the endpoints ($k_1$ and $k_4$). Because RK4 is a fourth-order method, the global truncation error is on the order of $O(\Delta t^4)$. This makes it vastly more accurate and stable than the Euler method, allowing for larger time steps without sacrificing precision.
 
+\vspace{1em}
+
+To demonstrate the efficacy of the RK4 method, the numerical solver was applied to the 1978 boarding school influenza dataset. Figure \ref{fig:rk4_data_driven} displays the RK4 approximation using data-driven parameters. The transmission ($\beta$) and recovery ($\gamma$) rates were computationally optimized using only the first seven days of training data. As shown, the RK4 solver seamlessly captures the epidemic's exponential peak and subsequent decline, proving its reliability in forecasting real-world transmission dynamics.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Figures/rk4_data_driven_params.png} 
+    \caption{RK4 approximation of the SIR model compared against observed data from the 1978 British boarding school influenza outbreak. The continuous curve accurately forecasts the unseen second week of the epidemic.}
+    \label{fig:rk4_data_driven}
+\end{figure}
+
+\vspace{1em}
+
+
+The theoretical advantage of the RK4 method becomes highly apparent when evaluating numerical stability across larger time steps. As illustrated in Figure \ref{fig:error_comparison}, both the Forward Euler and RK4 methods were tested against a high-precision baseline using an intentionally large step size of $\Delta t = 1.5$. 
+
+Because the Euler method is restricted to a first-order linear approximation, it evaluates the rate of infection at the start of the step and draws a straight line forward, failing to account for any curvature. Consequently, it drastically overshoots the true mathematical trajectory. Conversely, the RK4 method successfully anticipates the curvature of the epidemic by checking the midpoints of the time interval. Because of this sophisticated averaging, RK4 provides vastly superior numerical stability, perfectly tracking the high-precision baseline despite the massive time step.
+
+\begin{figure}[htbp]
+    \centering
+    % Ensure this filename matches your saved error comparison plot
+    \includegraphics[width=0.85\textwidth]{Figures/error_comparison.png} 
+    \caption{A visual demonstration of numerical stability. When evaluated with a large time step ($\Delta t = 1.5$), the Forward Euler method accumulates significant error and overshoots the peak, whereas the RK4 method remains highly precise.}
+    \label{fig:error_comparison}
+\end{figure}
+
+
+
+To fully evaluate the performance of these numerical solvers beyond visual stability, we must analyze how their errors decrease as we shrink the time step ($\Delta t$). Figure \ref{fig:error_convergence} displays this relationship side-by-side using both linear and logarithmic scales.
+
+The left panel utilizes a standard linear scale. On this graph, the Forward Euler method forms a straight diagonal line because its error decreases linearly with the time step. In contrast, the RK4 error appears completely flat and indistinguishable from zero for most step sizes. While this linear plot intuitively demonstrates that RK4 is vastly more accurate in absolute terms, it squashes the high-precision data, making it impossible to mathematically measure the algorithm's rate of improvement.
+
+To solve this, the right panel utilizes a log-log scale. In numerical analysis, a solver's error $E$ is proportional to the time step $\Delta t$ raised to a power $p$, which represents the theoretical order of the method:
+$$E \approx C \cdot \Delta t^p$$
+By taking the logarithm of both sides, this power-law relationship is transformed into a linear equation:
+$$\log(E) \approx p \cdot \log(\Delta t) + \log(C)$$
+On a log-log plot, the slope of the line directly reveals the exponent $p$. The graph shows the Forward Euler line has a slope of roughly 0.95, confirming its first-order theoretical bound. The RK4 line exhibits a slope of 3.72, clearly demonstrating its fourth-order accuracy. This mathematically proves that halving the time step in RK4 reduces the error by a factor of roughly 16, making it a vastly superior engine for epidemic modeling.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/error_convegerence.png} 
+    \caption{Side-by-side comparison of error convergence. The linear scale (left) highlights the absolute difference in accuracy, while the log-log scale (right) un-squashes the data to reveal the mathematical order of convergence (the slope) for each method.}
+    \label{fig:error_convergence}
+\end{figure}
+
 \section{Results and Analysis}
-
-\subsection{Baseline Simulation}
-% To insert a generated plot later, uncomment the lines below and place the image in the same folder.
-% \begin{figure}[h]
-%     \centering
-%     % \includegraphics[width=0.75\textwidth]{sir_baseline_plot.png}
-%     \caption{Epidemic curve showing S, I, and R populations over time (Baseline parameters).}
-%     \label{fig:baseline}
-% \end{figure}
-
-\subsection{Impact of Varying Parameters}
-TODO
+TODO : umesto poredjenja, veliki primer na kom demonstriram jos neke karakteristike modela?
 
 \section{Conclusion}
 TODO
