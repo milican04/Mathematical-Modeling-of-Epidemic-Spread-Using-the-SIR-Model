@@ -187,8 +187,47 @@ On a log-log plot, the slope of the line directly reveals the exponent $p$. The 
     \label{fig:error_convergence}
 \end{figure}
 
-\section{Results and Analysis}
-TODO : umesto poredjenja, veliki primer na kom demonstriram jos neke karakteristike modela?
+\section{Limitations of SIR model}
+
+While numerical methods such as the 4th Order Runge-Kutta (RK4) algorithm provide highly stable solutions for the ordinary differential equations (ODEs) of the SIR model, the underlying mathematical assumptions of the basic framework severely restrict its applicability to complex, long-term epidemiological data. 
+
+To explore these limitations, the model was evaluated against real-world data tracking the COVID-19 outbreak in Serbia throughout 2021. This dataset, sourced from the open-access database maintained by \textit{Our World in Data} (OWID), provides the daily number of newly confirmed cases. 
+
+In a theoretical SIR model, the infected compartment, $I(t)$, represents the total number of individuals who are currently sick and actively transmitting the virus. However, because public health agencies rarely track the exact duration of individual infections, true "active case" data is largely unavailable. To address this, daily new cases are utilized as a practical proxy. Although the absolute numbers are lower than total active infections, the shape of the incidence curve—its growth rate, peak timing, and eventual decline—closely mirrors the true infection trajectory. This makes it a highly valid metric for testing the model's behavior.
+
+When the basic SIR model is applied to this 360-day dataset—a timeframe characterized by two distinct epidemic waves—its structural limitations become immediately apparent. As visualized in Figure \ref{fig:corona_360}, the optimizer completely fails to capture the multi-wave dynamics, collapsing the simulation into an almost horizontal line.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/corona_360_days.png}
+    \caption{Failure on Multi-Wave Data. The model defaults to a constant average to minimize the global error across multiple peaks.}
+    \label{fig:corona_360}
+\end{figure}
+
+\subsection{Mathematical Constraints of a Closed System}
+The main limitation of the standard SIR model comes from its equation for infected people:
+$$ \frac{dI}{dt} = \left( \frac{\beta S}{N} - \gamma \right) I $$
+
+In simple terms, this math means the number of infections can only go up once, peak, and then go down. As long as there are many healthy people (the susceptible population, $S$) available to catch the virus, the infection spreads very quickly. However, once enough people get sick and recover, the virus runs out of new targets to infect. This turning point is known as herd immunity. 
+
+After reaching this point, the number of active infections drops steadily until the outbreak disappears completely. Because of how this equation is built, the basic SIR model is only capable of drawing one single epidemic wave and cannot bounce back up.
+
+\subsection{Optimization Breakdown in Non-Convex Landscapes}
+When a computational optimization algorithm, such as the Levenberg-Marquardt method used in \texttt{scipy.optimize.curve\_fit}, attempts to minimize the Sum of Squared Errors (SSE) over a multi-wave dataset, it faces a structural impossibility. Fitting the parameters to perfectly capture the first wave would result in an extreme error penalty during the second wave. To minimize the global error across both peaks and the intervening trough, the optimizer defaults to a degenerate solution: it drives both the transmission rate ($\beta$) and the recovery rate ($\gamma$) to their absolute lower bounds, effectively freezing the rate of change and producing a flatline average.
+
+\subsection{Epidemiological Implications}
+The failure of the model over the full year highlights the violation of its core assumptions in real-world scenarios. The basic SIR model assumes a constant transmission rate ($\beta$) and permanent immunity upon recovery. However, macroscopic epidemiological events are heavily influenced by dynamic human behavior (e.g., lockdowns), the emergence of more contagious virus variants, and waning immunity. To accurately model multi-wave outbreaks, the mathematical framework must be extended. 
+
+\subsection{Successful Modeling of Localized Outbreaks}
+Despite its failure over a full-year timeframe, the model is highly effective when applied to specific, localized parts of the dataset. If the evaluation period is restricted to a single epidemic wave, the RK4 numerical solver successfully captures the trajectory of the outbreak. 
+
+As shown in Figure \ref{fig:single_wave}, isolating the dataset to a single surge (approximately between days 30 and 130) allows the theoretical curve to closely align with the observed real-world daily cases. This localized success is entirely logical and aligns perfectly with the mathematical constraints previously discussed. Because the underlying equations are restricted to generating exactly one peak, the model can successfully fit the data as long as the observation window is limited to a single wave where the transmission rate ($\beta$) remains temporarily constant.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{Figures/corona_20_to_140_day.png}
+    \caption{COVID-19 Serbia: Accurate RK4 Fit on a Single Wave. The basic SIR model successfully captures the outbreak dynamics when the data is restricted to a single peak.}
+    \label{fig:single_wave}
+\end{figure}
 
 \section{Conclusion}
 TODO
