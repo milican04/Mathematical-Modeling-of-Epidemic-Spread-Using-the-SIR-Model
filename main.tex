@@ -17,11 +17,17 @@
 \maketitle
 
 \begin{abstract}
-TODO
+This project investigates the dynamics of infectious disease transmission by applying Forward Euler and fourth-order Runge-Kutta (RK4) numerical solvers to empirical datasets, demonstrating that while the standard SIR model accurately forecasts single-wave outbreaks, its structural constraints inherently fail to capture complex, multi-wave pandemics.
 \end{abstract}
-
 \section{Introduction}
-TODO 
+The mathematical modeling of infectious diseases is a critical application of scientific computing, providing the quantitative frameworks necessary to understand and simulate public health crises. This project explores the dynamics of epidemic spread through the Susceptible-Infectious-Recovered (SIR) compartmental model, one of the most fundamental frameworks in mathematical epidemiology. 
+
+Because the dynamic transitions between population compartments are governed by a system of non-linear ordinary differential equations (ODEs) that lack simple analytical solutions, numerical approximation is required. To achieve this, the project implements and compares foundational numerical methods, specifically the Forward Euler method and the fourth-order Runge-Kutta (RK4) algorithm. These solvers are rigorously evaluated for their accuracy, numerical stability, and error convergence across different time steps.
+
+To ground the mathematical theory in empirical reality, the computational models are tested against two distinct historical datasets. First, the numerical solvers are validated using a classic benchmark dataset: the 1978 influenza outbreak within a closed British boarding school. This perfectly isolated environment provides an ideal baseline for evaluating the deterministic accuracy of the ODE solvers on a single epidemic wave.
+
+Finally, the project critically examines the inherent limitations of the basic SIR framework when applied to complex, long-term epidemiological events. By evaluating the model against the 2021 COVID-19 multi-wave outbreak in Serbia—utilizing daily incidence data sourced from Our World in Data (OWID)—the study highlights the structural constraints of a closed system. Through this analysis, the project demonstrates both the power of numerical methods in successfully simulating localized outbreaks and their mathematical optimization breakdown when faced with dynamic human interventions and evolving viral transmission rates over prolonged periods.
+
 
 \section{The SIR Model}
 
@@ -247,8 +253,9 @@ To rigorously assess the performance of the RK4 solver on this localized epidemi
     \caption{COVID-19 Serbia: Accurate RK4 Fit on a Single Wave. The basic SIR model successfully captures the outbreak dynamics when the data is restricted to a single peak.}
     \label{fig:single_wave}
 \end{figure}
+\newpage
 
 \section{Conclusion}
-TODO
+This project evaluated the application of numerical methods to the SIR compartmental model, concluding that the fourth-order Runge-Kutta (RK4) algorithm provides vastly superior stability and precision compared to the Forward Euler method for solving epidemiological ODEs. When combined with computational parameter optimization, the RK4 solver accurately maps isolated, single-wave outbreaks, such as the 1978 boarding school influenza and short-term COVID-19 surges. However, the basic SIR framework inherently breaks down on long-term, multi-wave datasets. Because its closed-system equations permit only a single infection peak before reaching herd immunity, modeling prolonged pandemics requires extending the mathematical framework to account for dynamic human interventions, viral mutations, and waning immunity.
 
 \end{document}
