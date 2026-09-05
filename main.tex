@@ -258,4 +258,28 @@ To rigorously assess the performance of the RK4 solver on this localized epidemi
 \section{Conclusion}
 This project evaluated the application of numerical methods to the SIR compartmental model, concluding that the fourth-order Runge-Kutta (RK4) algorithm provides vastly superior stability and precision compared to the Forward Euler method for solving epidemiological ODEs. When combined with computational parameter optimization, the RK4 solver accurately maps isolated, single-wave outbreaks, such as the 1978 boarding school influenza and short-term COVID-19 surges. However, the basic SIR framework inherently breaks down on long-term, multi-wave datasets. Because its closed-system equations permit only a single infection peak before reaching herd immunity, modeling prolonged pandemics requires extending the mathematical framework to account for dynamic human interventions, viral mutations, and waning immunity.
 
+
+\section*{Acknowledgements}
+During the preparation of this project, the author utilized the Gemini artificial intelligence model to assist with structuring the document and translating text. The author reviewed and refined all AI-generated output and takes full responsibility for the final content and accuracy of this work.
+
+\begin{thebibliography}{9}
+
+\bibitem{brauer2008}
+Brauer, F., van den Driessche, P., \& Wu, J. (Eds.). (2008). 
+\textit{Mathematical Epidemiology (Lecture Notes in Mathematics)}. 
+Springer.
+
+\bibitem{mubarez}
+Mubarez, G. S., \& Mohsini, M. N. 
+\textit{SIR Model and its Applications}. 
+Research Article.
+
+\bibitem{james2023}
+James, G., Witten, D., Hastie, T., Tibshirani, R., \& Taylor, J. (2023). 
+\textit{An Introduction to Statistical Learning with Applications in Python}. 
+Springer.
+
+\end{thebibliography}
+
+
 \end{document}
